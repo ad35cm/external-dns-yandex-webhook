@@ -33,6 +33,11 @@ func main() {
 	}()
 
 	log.Infof("Using folder ID: %s", cfg.FolderID)
+	if cfg.AuthKeyFile == "" {
+		log.Info("Using Yandex Cloud workload identity")
+	} else {
+		log.Info("Using a Yandex Cloud service account key file")
+	}
 
 	m := http.NewServeMux()
 	m.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {

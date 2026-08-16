@@ -58,8 +58,27 @@ type YandexClient struct {
 }
 
 func NewYandexClient(folderID string, authKeyFile string) (*YandexClient, error) {
+	credentials, err := credentialsFromKeyFile(authKeyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	sdk, err := ycsdk.Build(context.Background(), ycsdk.Config{
+		Credentials: credentials,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Yandex Cloud SDK: %v", err)
+	}
+
+	return &YandexClient{
+		sdk:      sdk,
+		folderID: folderID,
+	}, nil
+}
+
+func credentialsFromKeyFile(authKeyFile string) (ycsdk.Credentials, error) {
 	if authKeyFile == "" {
-		return nil, fmt.Errorf("auth-key-file must be set")
+		return ycsdk.InstanceServiceAccount(), nil
 	}
 
 	saBytes, err := os.ReadFile(authKeyFile)
@@ -77,17 +96,7 @@ func NewYandexClient(folderID string, authKeyFile string) (*YandexClient, error)
 		return nil, fmt.Errorf("failed to create credentials: %v", err)
 	}
 
-	sdk, err := ycsdk.Build(context.Background(), ycsdk.Config{
-		Credentials: credentials,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Yandex Cloud SDK: %v", err)
-	}
-
-	return &YandexClient{
-		sdk:      sdk,
-		folderID: folderID,
-	}, nil
+	return credentials, nil
 }
 
 func (c *YandexClient) ListZones(ctx context.Context) ([]Zone, error) {
