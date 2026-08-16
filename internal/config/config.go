@@ -30,7 +30,7 @@ func LoadConfig() (*Config, error) {
 
 	// Define CLI flags
 	pflag.String("folder-id", "", "Yandex Cloud folder ID")
-	pflag.String("auth-key-file", "/etc/kubernetes/key.json", "Path to Yandex Cloud service account key file")
+	pflag.String("auth-key-file", "", "Optional path to a Yandex Cloud service account key file; omit to use workload identity")
 	pflag.Int("webhook-port", 8888, "Port for webhook server")
 	pflag.Int("health-port", 8080, "Port for health check server")
 	pflag.Parse()
@@ -65,14 +65,17 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("error unmarshaling config: %v", err)
 	}
 
-	// Validate required fields
-	if config.FolderID == "" {
-		return nil, fmt.Errorf("folder_id configuration is required")
-	}
-
-	if config.AuthKeyFile == "" {
-		return nil, fmt.Errorf("auth_key_file configuration is required")
+	if err := config.validate(); err != nil {
+		return nil, err
 	}
 
 	return &config, nil
+}
+
+func (config Config) validate() error {
+	if config.FolderID == "" {
+		return fmt.Errorf("folder_id configuration is required")
+	}
+
+	return nil
 }
