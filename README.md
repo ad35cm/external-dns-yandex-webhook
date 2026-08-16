@@ -20,8 +20,8 @@ provider:
   name: webhook
   webhook:
     image:
-      repository: ghcr.io/ismailbaskin/external-dns-yandex-webhook
-      tag: VERSION_WITH_WORKLOAD_IDENTITY_SUPPORT
+      repository: ghcr.io/ad35cm/external-dns-yandex-webhook
+      tag: 1.1.0
     args:
       - --folder-id=YOUR_FOLDER_ID
     resources: {}
